@@ -1,0 +1,21 @@
+language: go
+
+go:
+  - "1.10"
+
+services:
+  - postgresql
+
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+
+script:
+  - export DB_HOST=localhost
+  - export DB_PORT=5432
+  - export DB_USER=postgres
+  - export DB_PASS=''
+  - export DB_NAME=travis_ci_test
+  - go test -race -coverprofile=coverage.txt -covermode=atomic -v
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
