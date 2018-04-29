@@ -37,20 +37,19 @@ func createDummyPicture() Picture {
 	}
 }
 
-func testUserReels(t *testing.T) {
+func TestUserReels(t *testing.T) {
 	// Setup
 	DB.AutoMigrate(User{}, Reel{})
 	defer DB.DropTable(User{}, Reel{})
+	u := createDummyUser()
+	DB.Create(&u)
 	rs := []Reel{createDummyReel(), createDummyReel()}
 	for n := 0; n < len(rs); n++ {
+		rs[n].UserID = u.ID
 		DB.Create(&rs[n])
 	}
-	u := createDummyUser()
-	u.Reels = rs
-	DB.Create(&u)
-
 	// Test
-	var user User
-	DB.Where("ID = ?", u.ID).First(user)
-	assert.Equal(t, 2, len(user.Reels))
+	var dbrs []Reel
+	DB.Model(&u).Related(&dbrs)
+	assert.Equal(t, 2, len(dbrs))
 }
