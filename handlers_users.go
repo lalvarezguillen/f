@@ -15,7 +15,13 @@ func handleGetUser(c echo.Context) error {
 }
 
 func handleCreateUser(c echo.Context) error {
-	return nil
+	var u User
+	err := c.Bind(&u)
+	if err != nil {
+		return c.JSON(400, nil)
+	}
+	DB.Create(&u)
+	return c.JSON(201, u)
 }
 
 func handleUpdateUser(c echo.Context) error {
