@@ -1,9 +1,13 @@
 package main
 
-import "github.com/labstack/echo"
+import (
+	"github.com/labstack/echo"
+)
 
 func handleListUsers(c echo.Context) error {
-	return nil
+	var users []User
+	DB.Find(&users)
+	return c.JSON(200, users)
 }
 
 func handleGetUser(c echo.Context) error {
