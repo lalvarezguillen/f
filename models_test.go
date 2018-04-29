@@ -41,15 +41,68 @@ func TestUserReels(t *testing.T) {
 	// Setup
 	DB.AutoMigrate(User{}, Reel{})
 	defer DB.DropTable(User{}, Reel{})
+
 	u := createDummyUser()
 	DB.Create(&u)
-	rs := []Reel{createDummyReel(), createDummyReel()}
-	for n := 0; n < len(rs); n++ {
-		rs[n].UserID = u.ID
-		DB.Create(&rs[n])
+
+	var rs []Reel
+	for n := 0; n < 2; n++ {
+		r := createDummyReel()
+		r.UserID = u.ID
+		DB.Create(&r)
+		rs = append(rs, r)
 	}
+
 	// Test
 	var dbrs []Reel
 	DB.Model(&u).Related(&dbrs)
 	assert.Equal(t, 2, len(dbrs))
+}
+
+func TestReelPictures(t *testing.T) {
+	// Setup
+	DB.AutoMigrate(User{}, Reel{}, Picture{})
+	defer DB.DropTable(User{}, Reel{}, Picture{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+
+	var ps []Picture
+	for idx := 0; idx < 2; idx++ {
+		p := createDummyPicture()
+		p.UserID = u.ID
+		DB.Create(&p)
+		ps = append(ps, p)
+	}
+	r := createDummyReel()
+	r.UserID = u.ID
+	r.Pictures = ps
+	DB.Create(&r)
+
+	// Tests
+	var pics []Picture
+	DB.Model(&r).Related(&pics, "Pictures")
+	assert.Equal(t, 2, len(pics))
+}
+
+func TestUserPictures(t *testing.T) {
+	// Setup
+	DB.AutoMigrate(User{}, Picture{})
+	defer DB.DropTable(User{}, Picture{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+
+	var ps []Picture
+	for idx := 0; idx < 2; idx++ {
+		p := createDummyPicture()
+		p.UserID = u.ID
+		DB.Create(&p)
+		ps = append(ps, p)
+	}
+
+	// Tests
+	var pics []Picture
+	DB.Model(&u).Related(&pics)
+	assert.Equal(t, 2, len(pics))
 }
