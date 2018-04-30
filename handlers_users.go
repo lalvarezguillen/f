@@ -49,5 +49,13 @@ func handleUpdateUser(c echo.Context) error {
 }
 
 func handleDeleteUser(c echo.Context) error {
-	return nil
+	id := c.Param("id")
+	var count int
+	var u User
+	DB.Where("id = ?", id).First(&u).Count(&count)
+	if count == 0 {
+		return c.JSON(404, nil)
+	}
+	DB.Delete(&u)
+	return c.JSON(204, nil)
 }

@@ -178,3 +178,41 @@ func TestUpdateUserMalformed(t *testing.T) {
 		assert.Equal(t, 400, res.Code)
 	}
 }
+
+func TestDeleteUser(t *testing.T) {
+	DB.AutoMigrate(&User{})
+	defer DB.DropTable(&User{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	e := echo.New()
+	req := httptest.NewRequest(echo.DELETE, "/users/", strings.NewReader(""))
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("id")
+	c.SetParamValues(fmt.Sprint(u.ID))
+
+	if assert.NoError(t, handleDeleteUser(c)) {
+		assert.Equal(t, 204, res.Code)
+
+		var count int
+		DB.Model(&User{}).Count(&count)
+		assert.Equal(t, 0, count)
+	}
+}
+
+func TestDeleteNonexistentUser(t *testing.T) {
+	DB.AutoMigrate(&User{})
+	defer DB.DropTable(&User{})
+
+	e := echo.New()
+	req := httptest.NewRequest(echo.PUT, "/users/", strings.NewReader(""))
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("id")
+	c.SetParamValues("200")
+
+	if assert.NoError(t, handleDeleteUser(c)) {
+		assert.Equal(t, 404, res.Code)
+	}
+}
