@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -70,5 +71,42 @@ func TestHandleCreateUser(t *testing.T) {
 		var c int
 		DB.Model(&User{}).Count(&c)
 		assert.Equal(t, 1, c)
+	}
+}
+
+func TestHandleGetUser(t *testing.T) {
+	DB.AutoMigrate(&User{})
+	defer DB.DropTable(&User{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	e := echo.New()
+	req := httptest.NewRequest(echo.GET, "/users/", strings.NewReader(""))
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("id")
+	c.SetParamValues(fmt.Sprint(u.ID))
+
+	if assert.NoError(t, handleGetUser(c)) {
+		assert.Equal(t, 200, res.Code)
+		var respUser User
+		json.Unmarshal(res.Body.Bytes(), &respUser)
+		assert.Equal(t, u.ID, respUser.ID)
+	}
+}
+
+func TestGetNonexistentUser(t *testing.T) {
+	DB.AutoMigrate(&User{})
+	defer DB.DropTable(&User{})
+
+	e := echo.New()
+	req := httptest.NewRequest(echo.GET, "/users/", strings.NewReader(""))
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("id")
+	c.SetParamValues("200")
+
+	if assert.NoError(t, handleGetUser(c)) {
+		assert.Equal(t, 404, res.Code)
 	}
 }

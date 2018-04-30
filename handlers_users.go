@@ -11,7 +11,14 @@ func handleListUsers(c echo.Context) error {
 }
 
 func handleGetUser(c echo.Context) error {
-	return nil
+	id := c.Param("id")
+	var count int
+	var u User
+	DB.Where("id = ?", id).First(&u).Count(&count)
+	if count == 0 {
+		return c.JSON(404, nil)
+	}
+	return c.JSON(200, u)
 }
 
 func handleCreateUser(c echo.Context) error {
