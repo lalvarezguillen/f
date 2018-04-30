@@ -110,3 +110,71 @@ func TestGetNonexistentUser(t *testing.T) {
 		assert.Equal(t, 404, res.Code)
 	}
 }
+
+func TestUpdateUser(t *testing.T) {
+	DB.AutoMigrate(&User{})
+	defer DB.DropTable(&User{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	u.FirstName = "Renamed"
+	jsonUser, _ := json.Marshal(&u)
+	e := echo.New()
+	req := httptest.NewRequest(echo.PUT, "/users/",
+		strings.NewReader(string(jsonUser)))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("id")
+	c.SetParamValues(fmt.Sprint(u.ID))
+
+	if assert.NoError(t, handleUpdateUser(c)) {
+		assert.Equal(t, 200, res.Code)
+		var respUser User
+		json.Unmarshal(res.Body.Bytes(), &respUser)
+		assert.Equal(t, u.FirstName, respUser.FirstName)
+
+		var count int
+		DB.Model(&User{}).Count(&count)
+	}
+}
+
+func TestUpdateNonexistentUser(t *testing.T) {
+	DB.AutoMigrate(&User{})
+	defer DB.DropTable(&User{})
+
+	u := createDummyUser()
+	jsonUser, _ := json.Marshal(&u)
+	e := echo.New()
+	req := httptest.NewRequest(echo.PUT, "/users/",
+		strings.NewReader(string(jsonUser)))
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("id")
+	c.SetParamValues(fmt.Sprint(u.ID))
+
+	if assert.NoError(t, handleUpdateUser(c)) {
+		assert.Equal(t, 404, res.Code)
+	}
+}
+
+func TestUpdateUserMalformed(t *testing.T) {
+	DB.AutoMigrate(&User{})
+	defer DB.DropTable(&User{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	payload := map[string]string{"team": "Barcelona"}
+	jsonPayload, _ := json.Marshal(&payload)
+	e := echo.New()
+	req := httptest.NewRequest(echo.PUT, "/users/",
+		strings.NewReader(string(jsonPayload)))
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("id")
+	c.SetParamValues(fmt.Sprint(u.ID))
+
+	if assert.NoError(t, handleUpdateUser(c)) {
+		assert.Equal(t, 400, res.Code)
+	}
+}

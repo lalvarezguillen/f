@@ -32,7 +32,20 @@ func handleCreateUser(c echo.Context) error {
 }
 
 func handleUpdateUser(c echo.Context) error {
-	return nil
+	id := c.Param("id")
+	var count int
+	var u User
+	DB.Where("id = ?", id).First(&u).Count(&count)
+	if count == 0 {
+		return c.JSON(404, nil)
+	}
+	var updatedUser User
+	err := c.Bind(&updatedUser)
+	if err != nil {
+		return c.JSON(400, nil)
+	}
+	DB.Save(&updatedUser)
+	return c.JSON(200, updatedUser)
 }
 
 func handleDeleteUser(c echo.Context) error {
