@@ -2,22 +2,31 @@ package main
 
 import "github.com/labstack/echo"
 
-func handleListPictures(c echo.Context) error {
+func handleListUserPictures(c echo.Context) error {
+	userID := c.Param("userID")
+	var u User
+	var userCount int
+	DB.Where("id = ?", userID).First(&u).Count(&userCount)
+	if userCount == 0 {
+		return c.JSON(404, nil)
+	}
+	var pics []Picture
+	DB.Model(&u).Related(&pics)
+	return c.JSON(200, pics)
+}
+
+func handleGetUserPicture(c echo.Context) error {
 	return nil
 }
 
-func handleGetPicture(c echo.Context) error {
+func handleCreateUserPicture(c echo.Context) error {
 	return nil
 }
 
-func handleCreatePicture(c echo.Context) error {
+func handleUpdateUserPicture(c echo.Context) error {
 	return nil
 }
 
-func handleUpdatePicture(c echo.Context) error {
-	return nil
-}
-
-func handleDeletePicture(c echo.Context) error {
+func handleDeleteUserPicture(c echo.Context) error {
 	return nil
 }

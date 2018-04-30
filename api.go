@@ -20,10 +20,9 @@ func main() {
 	r.PUT("/:id", handleUpdateReel)
 	r.DELETE("/:id", handleDeleteUser)
 
-	p := api.Group("/pictures")
-	p.GET("/", handleListPictures)
-	p.GET("/:id", handleGetPicture)
-	p.POST("/", handleCreatePicture)
-	p.PUT("/:id", handleUpdatePicture)
-	p.DELETE("/:id", handleDeletePicture)
+	u.GET("/:userID/pictures/", handleListUserPictures)
+	u.GET("/:userID/pictures/:id", handleGetUserPicture)
+	u.POST("/:userID/pictures/", handleCreateUserPicture)
+	u.PUT("/:userID/pictures/:id", handleUpdateUserPicture)
+	u.DELETE("/:userID/pictures/:id", handleDeleteUserPicture)
 }
