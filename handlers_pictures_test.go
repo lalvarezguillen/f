@@ -76,3 +76,61 @@ func TestHandleListPicturesNonexistentUser(t *testing.T) {
 		assert.Equal(t, 404, res.Code)
 	}
 }
+
+func TestHandleGetUserPicture(t *testing.T) {
+	DB.AutoMigrate(&User{}, &Picture{})
+	defer DB.DropTable(&User{}, &Picture{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	p := createDummyPicture()
+	p.UserID = u.ID
+	DB.Create(&p)
+	e := echo.New()
+	req := httptest.NewRequest(echo.GET, "/user/:userID/pictures/:pictureID",
+		strings.NewReader(""))
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userID", "pictureID")
+	c.SetParamValues(fmt.Sprint(u.ID), fmt.Sprint(p.ID))
+
+	if assert.NoError(t, handleGetUserPicture(c)) {
+		assert.Equal(t, 200, res.Code)
+		var respPic Picture
+		json.Unmarshal(res.Body.Bytes(), &respPic)
+		assert.Equal(t, p.ID, respPic.ID)
+	}
+}
+
+func TestHandleGetNonexistentUserPic(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(echo.GET, "/users/:userID/pictures/:pictureID",
+		strings.NewReader(""))
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userID", "pictureID")
+	c.SetParamValues("200", "2")
+
+	if assert.NoError(t, handleGetUserPicture(c)) {
+		assert.Equal(t, 404, res.Code)
+	}
+}
+
+func TestHandleUserNonexistentPicture(t *testing.T) {
+	DB.AutoMigrate(&User{}, &Picture{})
+	defer DB.DropTable(&User{}, &Picture{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	e := echo.New()
+	req := httptest.NewRequest(echo.GET, "/users/:userID/pictures/:pictureID",
+		strings.NewReader(""))
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userID", "pictureID")
+	c.SetParamValues(fmt.Sprint(u.ID), "2")
+
+	if assert.NoError(t, handleGetUserPicture(c)) {
+		assert.Equal(t, 404, res.Code)
+	}
+}

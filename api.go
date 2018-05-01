@@ -21,8 +21,8 @@ func main() {
 	r.DELETE("/:id", handleDeleteUser)
 
 	u.GET("/:userID/pictures/", handleListUserPictures)
-	u.GET("/:userID/pictures/:id", handleGetUserPicture)
+	u.GET("/:userID/pictures/:pictureID", handleGetUserPicture)
 	u.POST("/:userID/pictures/", handleCreateUserPicture)
-	u.PUT("/:userID/pictures/:id", handleUpdateUserPicture)
-	u.DELETE("/:userID/pictures/:id", handleDeleteUserPicture)
+	u.PUT("/:userID/pictures/:pictureID", handleUpdateUserPicture)
+	u.DELETE("/:userID/pictures/:pictureID", handleDeleteUserPicture)
 }
