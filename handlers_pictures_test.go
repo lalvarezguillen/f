@@ -134,3 +134,70 @@ func TestHandleUserNonexistentPicture(t *testing.T) {
 		assert.Equal(t, 404, res.Code)
 	}
 }
+
+func TestHandleCreateUserPicture(t *testing.T) {
+	DB.AutoMigrate(&User{}, &Picture{})
+	defer DB.DropTable(&User{}, &Picture{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	p := createDummyPicture()
+	jsonPic, _ := json.Marshal(p)
+	e := echo.New()
+	req := httptest.NewRequest(echo.POST, "/users/:userID/pictures/:pictureID",
+		strings.NewReader(string(jsonPic)))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userID")
+	c.SetParamValues(fmt.Sprint(u.ID))
+
+	if assert.NoError(t, handleCreateUserPicture(c)) {
+		assert.Equal(t, 201, res.Code)
+		var respPic Picture
+		json.Unmarshal(res.Body.Bytes(), &respPic)
+		assert.Equal(t, u.ID, respPic.ID)
+	}
+}
+
+func TestHandleCreateNonexistentUserPicture(t *testing.T) {
+	DB.AutoMigrate(&User{}, &Picture{})
+	defer DB.DropTable(&User{}, &Picture{})
+
+	p := createDummyPicture()
+	jsonPic, _ := json.Marshal(p)
+	e := echo.New()
+	req := httptest.NewRequest(echo.POST, "/users/:userID/pictures/:pictureID",
+		strings.NewReader(string(jsonPic)))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userID")
+	c.SetParamValues("2")
+
+	if assert.NoError(t, handleCreateUserPicture(c)) {
+		assert.Equal(t, 404, res.Code)
+	}
+}
+
+func TestHandleCreateUserPictureMalformed(t *testing.T) {
+	DB.AutoMigrate(&User{}, &Picture{})
+	defer DB.DropTable(&User{}, &Picture{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	payload := map[string]int{"Caption": 1}
+	jsonPayload, _ := json.Marshal(payload)
+	e := echo.New()
+	req := httptest.NewRequest(echo.POST, "/users/:userID/pictures/:pictureID",
+		strings.NewReader(string(jsonPayload)))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userID")
+	c.SetParamValues(fmt.Sprint(u.ID))
+
+	if assert.NoError(t, handleCreateUserPicture(c)) {
+		assert.Equal(t, 400, res.Code)
+	}
+}
