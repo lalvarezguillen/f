@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/labstack/echo"
 )
 
@@ -54,7 +56,31 @@ func handleCreateUserPicture(c echo.Context) error {
 }
 
 func handleUpdateUserPicture(c echo.Context) error {
-	return nil
+	userID := c.Param("userID")
+	var user User
+	var userCount int
+	DB.Where("id = ?", userID).First(&user).Count(&userCount)
+	if userCount < 1 {
+		return c.JSON(404, nil)
+	}
+
+	picID, err := strconv.ParseUint(c.Param("pictureID"), 10, 32)
+	if err != nil {
+		return c.JSON(400, nil)
+	}
+	var picCount int
+	DB.Where("id = ?", picID).First(&Picture{}).Count(&picCount)
+	if picCount < 1 {
+		return c.JSON(404, nil)
+	}
+	var pic Picture
+	err = c.Bind(&pic)
+	if err != nil {
+		return c.JSON(400, nil)
+	}
+	pic.ID = uint(picID)
+	DB.Save(&pic)
+	return c.JSON(200, pic)
 }
 
 func handleDeleteUserPicture(c echo.Context) error {

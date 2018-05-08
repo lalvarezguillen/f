@@ -189,7 +189,7 @@ func TestHandleCreateUserPictureMalformed(t *testing.T) {
 	payload := map[string]int{"Caption": 1}
 	jsonPayload, _ := json.Marshal(payload)
 	e := echo.New()
-	req := httptest.NewRequest(echo.POST, "/users/:userID/pictures/:pictureID",
+	req := httptest.NewRequest(echo.POST, "/users/:userID/pictures",
 		strings.NewReader(string(jsonPayload)))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()
@@ -199,5 +199,34 @@ func TestHandleCreateUserPictureMalformed(t *testing.T) {
 
 	if assert.NoError(t, handleCreateUserPicture(c)) {
 		assert.Equal(t, 400, res.Code)
+	}
+}
+
+func TestHandleUpdateUserPicture(t *testing.T) {
+	DB.AutoMigrate(&User{}, &Picture{})
+	defer DB.DropTable(&User{}, &Picture{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	p := createDummyPicture()
+	p.UserID = u.ID
+	DB.Create(&p)
+	p.URL = "http://updated-url.com/dummy-pic.jpeg"
+	jsonPayload, _ := json.Marshal(p)
+
+	e := echo.New()
+	req := httptest.NewRequest(echo.PUT, "/users/:userID/pictures/:pictureID",
+		strings.NewReader(string(jsonPayload)))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userID", "pictureID")
+	c.SetParamValues(fmt.Sprint(u.ID), fmt.Sprint(p.ID))
+
+	if assert.NoError(t, handleUpdateUserPicture(c)) {
+		assert.Equal(t, 200, res.Code)
+		var respPicture Picture
+		json.Unmarshal(res.Body.Bytes(), &respPicture)
+		assert.Equal(t, p.URL, respPicture.URL)
 	}
 }
