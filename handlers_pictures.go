@@ -8,75 +8,51 @@ import (
 
 func handleListUserPictures(c echo.Context) error {
 	userID := c.Param("userID")
-	var u User
-	var userCount int
-	DB.Where("id = ?", userID).First(&u).Count(&userCount)
-	if userCount == 0 {
-		return echo.NewHTTPError(404)
-	}
 	var pics []Picture
-	DB.Model(&u).Related(&pics)
+	DB.Where("user_id = ?", userID).Find(&pics)
 	return c.JSON(200, pics)
 }
 
 func handleGetUserPicture(c echo.Context) error {
 	userID := c.Param("userID")
-	var u User
-	var userCount int
-	DB.Where("id = ?", userID).First(&u).Count(&userCount)
-	if userCount == 0 {
-		return c.JSON(404, nil)
-	}
 	picID := c.Param("pictureID")
 	var pic Picture
-	var picsCount int
-	DB.Where("id = ?", picID).First(&pic).Count(&picsCount)
-	if picsCount == 0 {
-		return c.JSON(404, nil)
+	DB.Where("user_id = ? AND id = ?", userID, picID).First(&pic)
+	if pic == (Picture{}) {
+		return echo.NewHTTPError(404)
 	}
 	return c.JSON(200, pic)
 }
 
 func handleCreateUserPicture(c echo.Context) error {
-	var u User
-	var userCount int
-	userID := c.Param("userID")
-	DB.Where("id = ?", userID).First(&u).Count(&userCount)
-	if userCount == 0 {
-		return c.JSON(404, nil)
-	}
+	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
 	var pic Picture
-	err := c.Bind(&pic)
+	err = c.Bind(&pic)
 	if err != nil {
-		return c.JSON(400, nil)
+		return echo.NewHTTPError(400)
 	}
-	pic.UserID = u.ID
+	pic.UserID = uint(userID)
 	DB.Create(&pic)
 	return c.JSON(201, pic)
 }
 
 func handleUpdateUserPicture(c echo.Context) error {
-	userID := c.Param("userID")
-	var user User
-	var userCount int
-	DB.Where("id = ?", userID).First(&user).Count(&userCount)
-	if userCount < 1 {
-		return c.JSON(404, nil)
+	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
+	if err != nil {
+		return echo.NewHTTPError(400)
 	}
-
 	picID, err := strconv.ParseUint(c.Param("pictureID"), 10, 32)
 	if err != nil {
-		return c.JSON(400, nil)
+		return echo.NewHTTPError(400)
 	}
-	var picCount int
-	DB.Where("id = ?", picID).First(&Picture{}).Count(&picCount)
-	if picCount < 1 {
-		return c.JSON(404, nil)
+	var p Picture
+	DB.Where("user_id = ? AND id = ?", userID, picID).First(&p)
+	if p == (Picture{}) {
+		return echo.NewHTTPError(404)
 	}
 	var pic Picture
-	err = c.Bind(&pic)
-	if err != nil {
-		return c.JSON(400, nil)
+	if err = c.Bind(&pic); err != nil {
+		return echo.NewHTTPError(400)
 	}
 	pic.ID = uint(picID)
 	DB.Save(&pic)
@@ -86,11 +62,10 @@ func handleUpdateUserPicture(c echo.Context) error {
 func handleDeleteUserPicture(c echo.Context) error {
 	uID := c.Param("userID")
 	pID := c.Param("pictureID")
-	var count int
 	var p Picture
 
-	DB.Where("id = ? AND user_id = ?", pID, uID).First(&p).Count(&count)
-	if count == 0 {
+	DB.Where("id = ? AND user_id = ?", pID, uID).First(&p)
+	if p == (Picture{}) {
 		return echo.NewHTTPError(404)
 	}
 	DB.Delete(&p)
