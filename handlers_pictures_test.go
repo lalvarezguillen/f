@@ -60,26 +60,6 @@ func TestHandleListUserPictures(t *testing.T) {
 	}
 }
 
-/* func TestHandleListPicturesNonexistentUser(t *testing.T) {
-	DB.AutoMigrate(&User{}, &Picture{})
-	defer DB.DropTable(&User{}, &Picture{})
-
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/user/:userID/pictures/",
-		strings.NewReader(")"))
-	res := httptest.NewRecorder()
-	c := e.NewContext(req, res)
-	c.SetParamNames("userID")
-	c.SetParamValues("200")
-
-	if err := handleListUserPictures(c); assert.Error(t, err) {
-		httpError, ok := err.(*echo.HTTPError)
-		if assert.True(t, ok) {
-			assert.Equal(t, 404, httpError.Code)
-		}
-	}
-} */
-
 func TestHandleGetUserPicture(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
@@ -105,21 +85,7 @@ func TestHandleGetUserPicture(t *testing.T) {
 	}
 }
 
-// func TestHandleGetNonexistentUserPic(t *testing.T) {
-// 	e := echo.New()
-// 	req := httptest.NewRequest(echo.GET, "/users/:userID/pictures/:pictureID",
-// 		strings.NewReader(""))
-// 	res := httptest.NewRecorder()
-// 	c := e.NewContext(req, res)
-// 	c.SetParamNames("userID", "pictureID")
-// 	c.SetParamValues("200", "2")
-
-// 	if assert.NoError(t, handleGetUserPicture(c)) {
-// 		assert.Equal(t, 404, res.Code)
-// 	}
-// }
-
-func TestHandleGetUserNonexistentPicture(t *testing.T) {
+func TestHandleGetNonexistentUserPicture(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -165,26 +131,6 @@ func TestHandleCreateUserPicture(t *testing.T) {
 		assert.Equal(t, u.ID, respPic.ID)
 	}
 }
-
-// func TestHandleCreateNonexistentUserPicture(t *testing.T) {
-// 	DB.AutoMigrate(&User{}, &Picture{})
-// 	defer DB.DropTable(&User{}, &Picture{})
-
-// 	p := createDummyPicture()
-// 	jsonPic, _ := json.Marshal(p)
-// 	e := echo.New()
-// 	req := httptest.NewRequest(echo.POST, "/users/:userID/pictures/:pictureID",
-// 		strings.NewReader(string(jsonPic)))
-// 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-// 	res := httptest.NewRecorder()
-// 	c := e.NewContext(req, res)
-// 	c.SetParamNames("userID")
-// 	c.SetParamValues("2")
-
-// 	if assert.NoError(t, handleCreateUserPicture(c)) {
-// 		assert.Equal(t, 404, res.Code)
-// 	}
-// }
 
 func TestHandleCreateUserPictureMalformed(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})

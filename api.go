@@ -6,7 +6,7 @@ func main() {
 	api := echo.New()
 	api.GET("/", getAPIInfo)
 
-	u := api.Group("/users")
+	u := api.Group("/users", GetUserFromURL)
 	u.GET("/", handleListUsers)
 	u.GET("/:id", handleGetUser)
 	u.POST("/", handleCreateUser)
@@ -20,8 +20,8 @@ func main() {
 	r.PUT("/:id", handleUpdateReel)
 	r.DELETE("/:id", handleDeleteUser)
 
-	u.GET("/:userID/pictures/", handleListUserPictures, GetUserFromURL)
-	u.GET("/:userID/pictures/:pictureID", handleGetUserPicture, GetUserFromURL)
+	u.GET("/:userID/pictures/", handleListUserPictures)
+	u.GET("/:userID/pictures/:pictureID", handleGetUserPicture)
 	u.POST("/:userID/pictures/", handleCreateUserPicture)
 	u.PUT("/:userID/pictures/:pictureID", handleUpdateUserPicture)
 	u.DELETE("/:userID/pictures/:pictureID", handleDeleteUserPicture)
