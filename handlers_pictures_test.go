@@ -72,8 +72,11 @@ func TestHandleListPicturesNonexistentUser(t *testing.T) {
 	c.SetParamNames("userID")
 	c.SetParamValues("200")
 
-	if assert.NoError(t, handleListUserPictures(c)) {
-		assert.Equal(t, 404, res.Code)
+	if err := handleListUserPictures(c); assert.Error(t, err) {
+		httpError, ok := err.(*echo.HTTPError)
+		if assert.True(t, ok) {
+			assert.Equal(t, 404, httpError.Code)
+		}
 	}
 }
 
@@ -228,5 +231,48 @@ func TestHandleUpdateUserPicture(t *testing.T) {
 		var respPicture Picture
 		json.Unmarshal(res.Body.Bytes(), &respPicture)
 		assert.Equal(t, p.URL, respPicture.URL)
+	}
+}
+
+func TestHandleDeleteUserPicture(t *testing.T) {
+	DB.AutoMigrate(&User{}, &Picture{})
+	defer DB.DropTable(&User{}, &Picture{})
+
+	u := createDummyUser()
+	DB.Create(&u)
+	p := createDummyPicture()
+	p.UserID = u.ID
+	DB.Create(&p)
+
+	e := echo.New()
+	req := httptest.NewRequest(echo.DELETE,
+		"/users/:userID/pictures/:pictureID", nil)
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userID", "pictureID")
+	c.SetParamValues(fmt.Sprint(u.ID), fmt.Sprint(p.ID))
+
+	if assert.NoError(t, handleDeleteUserPicture(c)) {
+		assert.Equal(t, 204, res.Code)
+	}
+}
+
+func TestHandleDeleteNonexistentUserPicture(t *testing.T) {
+	DB.AutoMigrate(&User{}, &Picture{})
+	defer DB.DropTable(&User{}, &Picture{})
+
+	e := echo.New()
+	req := httptest.NewRequest(echo.DELETE,
+		"/user/:userID/pictures/:pictureID", nil)
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userID", "pictureID")
+	c.SetParamValues("nonexistent-user", "nonexistent-pic")
+
+	if err := handleDeleteUserPicture(c); assert.Error(t, err) {
+		httpError, ok := err.(*echo.HTTPError)
+		if assert.True(t, ok) {
+			assert.Equal(t, 404, httpError.Code)
+		}
 	}
 }

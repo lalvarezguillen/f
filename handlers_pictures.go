@@ -12,7 +12,7 @@ func handleListUserPictures(c echo.Context) error {
 	var userCount int
 	DB.Where("id = ?", userID).First(&u).Count(&userCount)
 	if userCount == 0 {
-		return c.JSON(404, nil)
+		return echo.NewHTTPError(404)
 	}
 	var pics []Picture
 	DB.Model(&u).Related(&pics)
@@ -84,5 +84,15 @@ func handleUpdateUserPicture(c echo.Context) error {
 }
 
 func handleDeleteUserPicture(c echo.Context) error {
-	return nil
+	uID := c.Param("userID")
+	pID := c.Param("pictureID")
+	var count int
+	var p Picture
+
+	DB.Where("id = ? AND user_id = ?", pID, uID).First(&p).Count(&count)
+	if count == 0 {
+		return echo.NewHTTPError(404)
+	}
+	DB.Delete(&p)
+	return c.JSON(204, nil)
 }
