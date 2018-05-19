@@ -74,6 +74,26 @@ func TestHandleCreateUser(t *testing.T) {
 	}
 }
 
+func TestHandleCreateUserMalformed(t *testing.T) {
+	DB.AutoMigrate(&User{})
+	defer DB.DropTable(&User{})
+
+	e := echo.New()
+	uj, _ := json.Marshal([]string{"malformed", "payload"})
+	req := httptest.NewRequest(echo.POST, "/users/",
+		strings.NewReader(string(uj)))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
+	c := e.NewContext(req, res)
+
+	if err := handleCreateUser(c); assert.Error(t, err) {
+		httpError, ok := err.(*echo.HTTPError)
+		if assert.True(t, ok) {
+			assert.Equal(t, 400, httpError.Code)
+		}
+	}
+}
+
 func TestHandleGetUser(t *testing.T) {
 	DB.AutoMigrate(&User{})
 	defer DB.DropTable(&User{})
@@ -86,28 +106,13 @@ func TestHandleGetUser(t *testing.T) {
 	c := e.NewContext(req, res)
 	c.SetParamNames("id")
 	c.SetParamValues(fmt.Sprint(u.ID))
+	c.Set("user", u)
 
 	if assert.NoError(t, handleGetUser(c)) {
 		assert.Equal(t, 200, res.Code)
 		var respUser User
 		json.Unmarshal(res.Body.Bytes(), &respUser)
 		assert.Equal(t, u.ID, respUser.ID)
-	}
-}
-
-func TestGetNonexistentUser(t *testing.T) {
-	DB.AutoMigrate(&User{})
-	defer DB.DropTable(&User{})
-
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/users/", strings.NewReader(""))
-	res := httptest.NewRecorder()
-	c := e.NewContext(req, res)
-	c.SetParamNames("id")
-	c.SetParamValues("200")
-
-	if assert.NoError(t, handleGetUser(c)) {
-		assert.Equal(t, 404, res.Code)
 	}
 }
 
@@ -139,25 +144,6 @@ func TestUpdateUser(t *testing.T) {
 	}
 }
 
-func TestUpdateNonexistentUser(t *testing.T) {
-	DB.AutoMigrate(&User{})
-	defer DB.DropTable(&User{})
-
-	u := createDummyUser()
-	jsonUser, _ := json.Marshal(&u)
-	e := echo.New()
-	req := httptest.NewRequest(echo.PUT, "/users/",
-		strings.NewReader(string(jsonUser)))
-	res := httptest.NewRecorder()
-	c := e.NewContext(req, res)
-	c.SetParamNames("id")
-	c.SetParamValues(fmt.Sprint(u.ID))
-
-	if assert.NoError(t, handleUpdateUser(c)) {
-		assert.Equal(t, 404, res.Code)
-	}
-}
-
 func TestUpdateUserMalformed(t *testing.T) {
 	DB.AutoMigrate(&User{})
 	defer DB.DropTable(&User{})
@@ -174,8 +160,11 @@ func TestUpdateUserMalformed(t *testing.T) {
 	c.SetParamNames("id")
 	c.SetParamValues(fmt.Sprint(u.ID))
 
-	if assert.NoError(t, handleUpdateUser(c)) {
-		assert.Equal(t, 400, res.Code)
+	if err := handleUpdateUser(c); assert.Error(t, err) {
+		httpError, ok := err.(*echo.HTTPError)
+		if ok {
+			assert.Equal(t, 400, httpError.Code)
+		}
 	}
 }
 
@@ -191,6 +180,7 @@ func TestDeleteUser(t *testing.T) {
 	c := e.NewContext(req, res)
 	c.SetParamNames("id")
 	c.SetParamValues(fmt.Sprint(u.ID))
+	c.Set("user", u)
 
 	if assert.NoError(t, handleDeleteUser(c)) {
 		assert.Equal(t, 204, res.Code)
@@ -198,21 +188,5 @@ func TestDeleteUser(t *testing.T) {
 		var count int
 		DB.Model(&User{}).Count(&count)
 		assert.Equal(t, 0, count)
-	}
-}
-
-func TestDeleteNonexistentUser(t *testing.T) {
-	DB.AutoMigrate(&User{})
-	defer DB.DropTable(&User{})
-
-	e := echo.New()
-	req := httptest.NewRequest(echo.PUT, "/users/", strings.NewReader(""))
-	res := httptest.NewRecorder()
-	c := e.NewContext(req, res)
-	c.SetParamNames("id")
-	c.SetParamValues("200")
-
-	if assert.NoError(t, handleDeleteUser(c)) {
-		assert.Equal(t, 404, res.Code)
 	}
 }
