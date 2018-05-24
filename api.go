@@ -8,10 +8,10 @@ func main() {
 
 	u := api.Group("/users", GetUserFromURL)
 	u.GET("/", handleListUsers)
-	u.GET("/:id", handleGetUser)
+	u.GET("/:userID", handleGetUser)
 	u.POST("/", handleCreateUser)
-	u.PUT("/:id", handleUpdateUser)
-	u.DELETE("/:id", handleDeleteUser)
+	u.PUT("/:userID", handleUpdateUser)
+	u.DELETE("/:userID", handleDeleteUser)
 
 	r := api.Group("/reels")
 	r.GET("/", handleListReels)

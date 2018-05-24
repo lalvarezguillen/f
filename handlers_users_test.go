@@ -104,7 +104,7 @@ func TestHandleGetUser(t *testing.T) {
 	req := httptest.NewRequest(echo.GET, "/users/", strings.NewReader(""))
 	res := httptest.NewRecorder()
 	c := e.NewContext(req, res)
-	c.SetParamNames("id")
+	c.SetParamNames("userID")
 	c.SetParamValues(fmt.Sprint(u.ID))
 	c.Set("user", u)
 
@@ -130,7 +130,7 @@ func TestUpdateUser(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()
 	c := e.NewContext(req, res)
-	c.SetParamNames("id")
+	c.SetParamNames("userID")
 	c.SetParamValues(fmt.Sprint(u.ID))
 
 	if assert.NoError(t, handleUpdateUser(c)) {
@@ -157,7 +157,7 @@ func TestUpdateUserMalformed(t *testing.T) {
 		strings.NewReader(string(jsonPayload)))
 	res := httptest.NewRecorder()
 	c := e.NewContext(req, res)
-	c.SetParamNames("id")
+	c.SetParamNames("userID")
 	c.SetParamValues(fmt.Sprint(u.ID))
 
 	if err := handleUpdateUser(c); assert.Error(t, err) {
@@ -178,7 +178,7 @@ func TestDeleteUser(t *testing.T) {
 	req := httptest.NewRequest(echo.DELETE, "/users/", strings.NewReader(""))
 	res := httptest.NewRecorder()
 	c := e.NewContext(req, res)
-	c.SetParamNames("id")
+	c.SetParamNames("userID")
 	c.SetParamValues(fmt.Sprint(u.ID))
 	c.Set("user", u)
 

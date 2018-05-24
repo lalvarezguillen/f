@@ -18,6 +18,6 @@ func GetUserFromURL(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(404)
 		}
 		c.Set("user", u)
-		return nil
+		return next(c)
 	}
 }

@@ -30,7 +30,7 @@ func handleCreateUser(c echo.Context) error {
 }
 
 func handleUpdateUser(c echo.Context) error {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	id, err := strconv.ParseUint(c.Param("userID"), 10, 32)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
