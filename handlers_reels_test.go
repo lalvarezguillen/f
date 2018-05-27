@@ -218,6 +218,7 @@ func TestHandleUpdateReelMalformed(t *testing.T) {
 	u := createDummyUser()
 	DB.Create(&u)
 	r := createDummyReel()
+	r.UserID = u.ID
 	DB.Create(&r)
 	jsonPayload, _ := json.Marshal([]int{1, 2, 3})
 
@@ -228,7 +229,7 @@ func TestHandleUpdateReelMalformed(t *testing.T) {
 	resp := httptest.NewRecorder()
 	c := e.NewContext(req, resp)
 	c.SetParamNames("userID", "reelID")
-	c.SetParamValues(fmt.Sprint())
+	c.SetParamValues(fmt.Sprint(u.ID), fmt.Sprint(r.ID))
 	c.Set("user", u)
 
 	if err := handleUpdateReel(c); assert.Error(t, err) {
