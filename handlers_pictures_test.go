@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandleListUserPicturesEmpty(t *testing.T) {
+func TestHandleListPicturesEmpty(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -25,7 +25,7 @@ func TestHandleListUserPicturesEmpty(t *testing.T) {
 	c.SetParamNames("userID")
 	c.SetParamValues(fmt.Sprint(u.ID))
 
-	if assert.NoError(t, handleListUserPictures(c)) {
+	if assert.NoError(t, handleListPictures(c)) {
 		assert.Equal(t, 200, res.Code)
 		var pictures []Picture
 		json.Unmarshal(res.Body.Bytes(), &pictures)
@@ -33,7 +33,7 @@ func TestHandleListUserPicturesEmpty(t *testing.T) {
 	}
 }
 
-func TestHandleListUserPictures(t *testing.T) {
+func TestHandleListPictures(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -52,7 +52,7 @@ func TestHandleListUserPictures(t *testing.T) {
 	c.SetParamNames("userID")
 	c.SetParamValues(fmt.Sprint(u.ID))
 
-	if assert.NoError(t, handleListUserPictures(c)) {
+	if assert.NoError(t, handleListPictures(c)) {
 		assert.Equal(t, 200, res.Code)
 		var pictures []Picture
 		json.Unmarshal(res.Body.Bytes(), &pictures)
@@ -60,7 +60,7 @@ func TestHandleListUserPictures(t *testing.T) {
 	}
 }
 
-func TestHandleGetUserPicture(t *testing.T) {
+func TestHandleGetPicture(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -77,7 +77,7 @@ func TestHandleGetUserPicture(t *testing.T) {
 	c.SetParamNames("userID", "pictureID")
 	c.SetParamValues(fmt.Sprint(u.ID), fmt.Sprint(p.ID))
 
-	if assert.NoError(t, handleGetUserPicture(c)) {
+	if assert.NoError(t, handleGetPicture(c)) {
 		assert.Equal(t, 200, res.Code)
 		var respPic Picture
 		json.Unmarshal(res.Body.Bytes(), &respPic)
@@ -85,7 +85,7 @@ func TestHandleGetUserPicture(t *testing.T) {
 	}
 }
 
-func TestHandleGetNonexistentUserPicture(t *testing.T) {
+func TestHandleGetNonexistentPicture(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -99,7 +99,7 @@ func TestHandleGetNonexistentUserPicture(t *testing.T) {
 	c.SetParamNames("userID", "pictureID")
 	c.SetParamValues(fmt.Sprint(u.ID), "2")
 
-	if err := handleGetUserPicture(c); assert.Error(t, err) {
+	if err := handleGetPicture(c); assert.Error(t, err) {
 		httpError, ok := err.(*echo.HTTPError)
 		if assert.True(t, ok) {
 			assert.Equal(t, 404, httpError.Code)
@@ -107,7 +107,7 @@ func TestHandleGetNonexistentUserPicture(t *testing.T) {
 	}
 }
 
-func TestHandleCreateUserPicture(t *testing.T) {
+func TestHandleCreatePicture(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -124,7 +124,7 @@ func TestHandleCreateUserPicture(t *testing.T) {
 	c.SetParamNames("userID")
 	c.SetParamValues(fmt.Sprint(u.ID))
 
-	if assert.NoError(t, handleCreateUserPicture(c)) {
+	if assert.NoError(t, handleCreatePicture(c)) {
 		assert.Equal(t, 201, res.Code)
 		var respPic Picture
 		json.Unmarshal(res.Body.Bytes(), &respPic)
@@ -132,7 +132,7 @@ func TestHandleCreateUserPicture(t *testing.T) {
 	}
 }
 
-func TestHandleCreateUserPictureMalformed(t *testing.T) {
+func TestHandleCreatePictureMalformed(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -149,7 +149,7 @@ func TestHandleCreateUserPictureMalformed(t *testing.T) {
 	c.SetParamNames("userID")
 	c.SetParamValues(fmt.Sprint(u.ID))
 
-	if err := handleCreateUserPicture(c); assert.Error(t, err) {
+	if err := handleCreatePicture(c); assert.Error(t, err) {
 		httpError, ok := err.(*echo.HTTPError)
 		if assert.True(t, ok) {
 			assert.Equal(t, 400, httpError.Code)
@@ -157,7 +157,7 @@ func TestHandleCreateUserPictureMalformed(t *testing.T) {
 	}
 }
 
-func TestHandleUpdateUserPicture(t *testing.T) {
+func TestHandleUpdatePicture(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -178,7 +178,7 @@ func TestHandleUpdateUserPicture(t *testing.T) {
 	c.SetParamNames("userID", "pictureID")
 	c.SetParamValues(fmt.Sprint(u.ID), fmt.Sprint(p.ID))
 
-	if assert.NoError(t, handleUpdateUserPicture(c)) {
+	if assert.NoError(t, handleUpdatePicture(c)) {
 		assert.Equal(t, 200, res.Code)
 		var respPicture Picture
 		json.Unmarshal(res.Body.Bytes(), &respPicture)
@@ -186,7 +186,7 @@ func TestHandleUpdateUserPicture(t *testing.T) {
 	}
 }
 
-func TestUpdateNonexistantUserPicture(t *testing.T) {
+func TestUpdateNonexistantPicture(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -205,7 +205,7 @@ func TestUpdateNonexistantUserPicture(t *testing.T) {
 	c.SetParamNames("userID", "pictureID")
 	c.SetParamValues(fmt.Sprint(u.ID), fmt.Sprint(500))
 
-	if err := handleUpdateUserPicture(c); assert.Error(t, err) {
+	if err := handleUpdatePicture(c); assert.Error(t, err) {
 		httpError, ok := err.(*echo.HTTPError)
 		if assert.True(t, ok) {
 			assert.Equal(t, 404, httpError.Code)
@@ -213,7 +213,7 @@ func TestUpdateNonexistantUserPicture(t *testing.T) {
 	}
 }
 
-func TestHandleUpdateUserPictureMalformed(t *testing.T) {
+func TestHandleUpdatePictureMalformed(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -230,7 +230,7 @@ func TestHandleUpdateUserPictureMalformed(t *testing.T) {
 	res := httptest.NewRecorder()
 	c := e.NewContext(req, res)
 
-	if err := handleUpdateUserPicture(c); assert.Error(t, err) {
+	if err := handleUpdatePicture(c); assert.Error(t, err) {
 		httpError, ok := err.(*echo.HTTPError)
 		if assert.True(t, ok) {
 			assert.Equal(t, 400, httpError.Code)
@@ -238,7 +238,7 @@ func TestHandleUpdateUserPictureMalformed(t *testing.T) {
 	}
 }
 
-func TestHandleDeleteUserPicture(t *testing.T) {
+func TestHandleDeletePicture(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -256,12 +256,12 @@ func TestHandleDeleteUserPicture(t *testing.T) {
 	c.SetParamNames("userID", "pictureID")
 	c.SetParamValues(fmt.Sprint(u.ID), fmt.Sprint(p.ID))
 
-	if assert.NoError(t, handleDeleteUserPicture(c)) {
+	if assert.NoError(t, handleDeletePicture(c)) {
 		assert.Equal(t, 204, res.Code)
 	}
 }
 
-func TestHandleDeleteNonexistentUserPicture(t *testing.T) {
+func TestHandleDeleteNonexistentPicture(t *testing.T) {
 	DB.AutoMigrate(&User{}, &Picture{})
 	defer DB.DropTable(&User{}, &Picture{})
 
@@ -273,7 +273,7 @@ func TestHandleDeleteNonexistentUserPicture(t *testing.T) {
 	c.SetParamNames("userID", "pictureID")
 	c.SetParamValues("nonexistent-user", "nonexistent-pic")
 
-	if err := handleDeleteUserPicture(c); assert.Error(t, err) {
+	if err := handleDeletePicture(c); assert.Error(t, err) {
 		httpError, ok := err.(*echo.HTTPError)
 		if assert.True(t, ok) {
 			assert.Equal(t, 404, httpError.Code)

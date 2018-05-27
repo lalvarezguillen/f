@@ -6,14 +6,14 @@ import (
 	"github.com/labstack/echo"
 )
 
-func handleListUserPictures(c echo.Context) error {
+func handleListPictures(c echo.Context) error {
 	userID := c.Param("userID")
 	var pics []Picture
 	DB.Where("user_id = ?", userID).Find(&pics)
 	return c.JSON(200, pics)
 }
 
-func handleGetUserPicture(c echo.Context) error {
+func handleGetPicture(c echo.Context) error {
 	userID := c.Param("userID")
 	picID := c.Param("pictureID")
 	var pic Picture
@@ -24,7 +24,7 @@ func handleGetUserPicture(c echo.Context) error {
 	return c.JSON(200, pic)
 }
 
-func handleCreateUserPicture(c echo.Context) error {
+func handleCreatePicture(c echo.Context) error {
 	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
 	var pic Picture
 	err = c.Bind(&pic)
@@ -36,7 +36,7 @@ func handleCreateUserPicture(c echo.Context) error {
 	return c.JSON(201, pic)
 }
 
-func handleUpdateUserPicture(c echo.Context) error {
+func handleUpdatePicture(c echo.Context) error {
 	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
 	if err != nil {
 		return echo.NewHTTPError(400)
@@ -59,7 +59,7 @@ func handleUpdateUserPicture(c echo.Context) error {
 	return c.JSON(200, pic)
 }
 
-func handleDeleteUserPicture(c echo.Context) error {
+func handleDeletePicture(c echo.Context) error {
 	uID := c.Param("userID")
 	pID := c.Param("pictureID")
 	var p Picture
