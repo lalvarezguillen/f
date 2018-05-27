@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/gommon/log"
 )
 
 func handleListUsers(c echo.Context) error {
@@ -15,6 +16,7 @@ func handleListUsers(c echo.Context) error {
 func handleGetUser(c echo.Context) error {
 	u, ok := c.Get("user").(User)
 	if !ok {
+		log.Error("Unable to cast c.user to User type")
 		return echo.NewHTTPError(500)
 	}
 	return c.JSON(200, u)
@@ -23,6 +25,7 @@ func handleGetUser(c echo.Context) error {
 func handleCreateUser(c echo.Context) error {
 	var u User
 	if err := c.Bind(&u); err != nil {
+		log.Error(err)
 		return echo.NewHTTPError(400)
 	}
 	DB.Create(&u)
@@ -32,10 +35,12 @@ func handleCreateUser(c echo.Context) error {
 func handleUpdateUser(c echo.Context) error {
 	id, err := strconv.ParseUint(c.Param("userID"), 10, 32)
 	if err != nil {
+		log.Error(err)
 		return echo.NewHTTPError(400)
 	}
 	var updatedUser User
 	if err = c.Bind(&updatedUser); err != nil {
+		log.Error(err)
 		return echo.NewHTTPError(400)
 	}
 	updatedUser.ID = uint(id)
@@ -46,6 +51,7 @@ func handleUpdateUser(c echo.Context) error {
 func handleDeleteUser(c echo.Context) error {
 	u, ok := c.Get("user").(User)
 	if !ok {
+		log.Error("Unable to cast c.user to User type")
 		return echo.NewHTTPError(500)
 	}
 	DB.Delete(&u)

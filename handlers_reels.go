@@ -28,10 +28,12 @@ func handleGetReel(c echo.Context) error {
 func handleCreateReel(c echo.Context) error {
 	var r Reel
 	if err := c.Bind(&r); err != nil {
+		log.Error(err)
 		return echo.NewHTTPError(400)
 	}
 	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
 	if err != nil {
+		log.Error(err)
 		return echo.NewHTTPError(400)
 	}
 	r.UserID = uint(userID)

@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/gommon/log"
 )
 
 func handleListPictures(c echo.Context) error {
@@ -29,6 +30,7 @@ func handleCreatePicture(c echo.Context) error {
 	var pic Picture
 	err = c.Bind(&pic)
 	if err != nil {
+		log.Error(err)
 		return echo.NewHTTPError(400)
 	}
 	pic.UserID = uint(userID)
@@ -39,10 +41,12 @@ func handleCreatePicture(c echo.Context) error {
 func handleUpdatePicture(c echo.Context) error {
 	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
 	if err != nil {
+		log.Error(err)
 		return echo.NewHTTPError(400)
 	}
 	picID, err := strconv.ParseUint(c.Param("pictureID"), 10, 32)
 	if err != nil {
+		log.Error(err)
 		return echo.NewHTTPError(400)
 	}
 	var p Picture
@@ -52,6 +56,7 @@ func handleUpdatePicture(c echo.Context) error {
 	}
 	var pic Picture
 	if err = c.Bind(&pic); err != nil {
+		log.Error(err)
 		return echo.NewHTTPError(400)
 	}
 	pic.ID = uint(picID)
