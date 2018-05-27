@@ -10,7 +10,7 @@ func GetUserFromURL(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userID := c.Param("userID")
 		if userID == "" {
-			return nil
+			return echo.NewHTTPError(400)
 		}
 		var u User
 		DB.Where("id = ?", userID).First(&u)
