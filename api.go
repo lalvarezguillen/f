@@ -1,9 +1,13 @@
 package main
 
-import "github.com/labstack/echo"
+import (
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
+)
 
 func main() {
 	api := echo.New()
+	api.Use(middleware.Logger())
 	api.GET("/", getAPIInfo)
 
 	u := api.Group("/users", GetUserFromURL)
