@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -8,7 +10,8 @@ import (
 func main() {
 	api := echo.New()
 	api.Use(middleware.Logger())
-	api.GET("/", getAPIInfo)
+	api.Use(middleware.RequestID())
+	api.GET("/", handleGetAPIInfo)
 
 	u := api.Group("/users", GetUserFromURL)
 	u.GET("/", handleListUsers)
@@ -28,4 +31,6 @@ func main() {
 	u.POST("/:userID/pictures/", handleCreatePicture)
 	u.PUT("/:userID/pictures/:pictureID", handleUpdatePicture)
 	u.DELETE("/:userID/pictures/:pictureID", handleDeletePicture)
+
+	log.Fatal(api.Start(":1234"))
 }
